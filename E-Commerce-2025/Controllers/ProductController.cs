@@ -27,5 +27,16 @@ namespace E_Commerce_2025.Controllers
             }
             return Ok(result);
         }
+
+        [HttpGet("{productId}")]
+        public async Task<IActionResult> GetProduct(Guid productId)
+        {
+            var result = await _prodMethods.GetProduct(productId);
+            if (!result.IsSuccess)
+            {
+                return NotFound(result.Error);
+            }
+            return Ok(result.Products);
+        }
     }
 }

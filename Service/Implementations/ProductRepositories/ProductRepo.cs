@@ -3,16 +3,12 @@ using DataAccess.Entities;
 using DTOs.ProductDtos;
 using Microsoft.EntityFrameworkCore;
 using Service.Common;
+using Service.Common.ProductResponses;
 using Service.Interfaces.ProductInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Service.Implementations.ProductRepositories
 {
-    public class ProductRepo:IProduct
+    public class ProductRepo : IProduct
     {
         public readonly AppDbContext _context;
         public ProductRepo(AppDbContext context)
@@ -41,7 +37,34 @@ namespace Service.Implementations.ProductRepositories
             };
             await _context.Products.AddAsync(newProduct);
             await _context.SaveChangesAsync();
-            return new APIResponse { IsSuccess = true};
+            return new APIResponse { IsSuccess = true };
+        }
+        public async Task<GetProductResponse> GetProduct(Guid productId)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (product == null)
+            {
+                return new GetProductResponse { IsSuccess = false, Error = "Product not found" };
             }
+            var productInfo = new GetProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                StockQuantity = product.StockQuantity,
+                SKU = product.SKU,
+                Color = product.Color,
+                Size = product.Size
+            };
+
+            return new GetProductResponse
+            {
+                IsSuccess = true,
+                Product = productInfo
+            }
+            ;
+        }
     }
 }
