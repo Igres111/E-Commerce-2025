@@ -1,5 +1,7 @@
 using DataAccess.Database;
 using Microsoft.EntityFrameworkCore;
+using Service.Implementations.ProductRepositories;
+using Service.Interfaces.ProductInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connection);
 });
 
+builder.Services.AddScoped<IProduct, ProductRepo>();
 
 var app = builder.Build();
 
