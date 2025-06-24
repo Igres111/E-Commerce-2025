@@ -4,16 +4,12 @@ using DTOs.CategoryDtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Service.Common;
+using Service.Common.CategoryResponse;
 using Service.Interfaces.CategoryInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Service.Implementations.CategoryRepositories
 {
-    public class CategoryRepo: ICategory
+    public class CategoryRepo : ICategory
     {
         public readonly AppDbContext _context;
         public CategoryRepo(AppDbContext context)
@@ -41,7 +37,7 @@ namespace Service.Implementations.CategoryRepositories
                     Error = "Category already exists",
                 };
             }
-                var category = new Category
+            var category = new Category
             {
                 Name = categoryInfo.Name,
                 ParentCategoryId = categoryInfo.ParentCategoryId,
@@ -53,6 +49,36 @@ namespace Service.Implementations.CategoryRepositories
             {
                 IsSuccess = true
             };
+        }
+        public async Task<GetAllCategoryResponse> GetAllCategories()
+        {
+            var categories = await _context.Categories
+                .Include(c => c.Subcategories)
+                .ToListAsync();
+
+            if (categories.Count == 0)
+            {
+                return new GetAllCategoryResponse
+                {
+                    IsSuccess = false,
+                    Error = "No categories found"
+                };
+            }
+
+            var result = categories
+                .Where(c => c.ParentCategoryId == null)
+                .Select(c => new GetAllCategoriesDto
+            {
+                Name = c.Name,
+                Id = c.Id,
+                Subcategories = c.Subcategories.Select(sub => new GetSubCategoryDto
+                {
+                    Id = sub.Id,
+                    Name = sub.Name,
+                }).ToList()
+            }).ToList();
+
+            return new GetAllCategoryResponse { IsSuccess = true, AllCategories = result };
         }
     }
 }

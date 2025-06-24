@@ -1,5 +1,7 @@
-﻿using DTOs.CategoryDtos;
+﻿using DataAccess.Entities;
+using DTOs.CategoryDtos;
 using Service.Common;
+using Service.Common.CategoryResponse;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +13,6 @@ namespace Service.Interfaces.CategoryInterfaces
     public interface ICategory
     {
         public Task<APIResponse> CreateCategory(CreateCategoryDto categoryInfo);
+        public Task<GetAllCategoryResponse> GetAllCategories();
     }
 }

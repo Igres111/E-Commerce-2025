@@ -30,12 +30,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connection);
 });
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.MaxDepth = 32; 
+    });
+
 builder.Services.AddScoped<IProduct, ProductRepo>();
 builder.Services.AddScoped<ICategory, CategoryRepo>();
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionMiddleware>();
+//app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

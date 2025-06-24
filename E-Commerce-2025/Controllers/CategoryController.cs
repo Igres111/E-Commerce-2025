@@ -17,7 +17,7 @@ namespace E_Commerce_2025.Controllers
         [HttpPost()]
         public async Task<IActionResult> CreateCategory(CreateCategoryDto categoryInfo)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -27,6 +27,16 @@ namespace E_Commerce_2025.Controllers
                 return Ok(response);
             }
             return BadRequest(response);
+        }
+        [HttpGet("All")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var response = await _categoryMethods.GetAllCategories();
+            if(!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
     }
 }
