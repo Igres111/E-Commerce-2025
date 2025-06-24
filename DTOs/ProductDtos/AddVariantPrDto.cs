@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccess.Entities
+namespace DTOs.ProductDtos
 {
-    public class Product:BaseEntity
+    public class AddVariantPrDto
     {
-        public Guid Id { get; set; }
-        public Guid? GroupId { get; set; }
+        public Guid ProductId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
@@ -17,8 +16,5 @@ namespace DataAccess.Entities
         public string SKU { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty;
         public string Size { get; set; } = string.Empty;
-        public Guid? UserId { get; set; }
-        public User? User { get; set; }
-        public List<Category> Categories { get; set; }
     }
 }

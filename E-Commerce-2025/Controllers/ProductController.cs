@@ -13,7 +13,7 @@ namespace E_Commerce_2025.Controllers
         {
             _prodMethods = prodMethods;
         }
-        [HttpPost("AddProduct")]
+        [HttpPost()]
         public async Task<IActionResult> AddProduct([FromBody] DTOs.ProductDtos.AddProductDto productInfo)
         {
             if (!ModelState.IsValid)
@@ -39,7 +39,7 @@ namespace E_Commerce_2025.Controllers
             return Ok(result.Product);
         }
 
-        [HttpPut("Update")]
+        [HttpPut("{productId}")]
         public async Task<IActionResult> UpdateProduct([FromBody] DTOs.ProductDtos.UpdateProductDto productInfo)
         {
             if (!ModelState.IsValid)
@@ -60,6 +60,20 @@ namespace E_Commerce_2025.Controllers
             if (!result.IsSuccess)
             {
                 return NotFound(result.Error);
+            }
+            return Ok(result);
+        }
+        [HttpPost("{productId}/variants")]
+        public async Task<IActionResult> AddVariant([FromBody] DTOs.ProductDtos.AddVariantPrDto productInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _prodMethods.AddVariantPr(productInfo);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
             }
             return Ok(result);
         }

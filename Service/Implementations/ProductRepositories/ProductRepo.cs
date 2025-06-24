@@ -103,5 +103,38 @@ namespace Service.Implementations.ProductRepositories
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
         }
+        public async Task<APIResponse> AddVariantPr(AddVariantPrDto productInfo)
+        {
+            var product = await _context.Products
+                .Where(p => p.DeletedAt == null)
+                .FirstOrDefaultAsync(p => p.Id == productInfo.ProductId);
+            if (product == null)
+            {
+                return new APIResponse { IsSuccess = false, Error = "Product not found" };
+            }
+            var variantExists = await _context.Products
+                .Where(v => v.DeletedAt == null)
+                .FirstOrDefaultAsync(v => v.SKU == productInfo.SKU && v.GroupId == productInfo.ProductId);
+            if( variantExists != null)
+            {
+                return new APIResponse { IsSuccess = false, Error = "Variant with this SKU already exists" };
+            }
+            var newVariant = new Product
+            {
+                Id = Guid.NewGuid(),
+                GroupId= product.Id,
+                Name = productInfo.Name,
+                Description = productInfo.Description,
+                Price = productInfo.Price,
+                StockQuantity = productInfo.StockQuantity,
+                SKU = productInfo.SKU,
+                Color = productInfo.Color,
+                Size = productInfo.Size,
+                CreatedAt = DateTime.UtcNow,
+            };
+            await _context.Products.AddAsync(newVariant);
+            await _context.SaveChangesAsync();
+            return new APIResponse { IsSuccess = true };
+            }
     }
 }
