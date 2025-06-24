@@ -77,5 +77,15 @@ namespace E_Commerce_2025.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("{productId}/variants")]
+        public async Task<IActionResult> GetVariant(Guid productId)
+        {
+            var result = await _prodMethods.GetVariantsPr(productId);
+            if (!result.IsSuccess)
+            {
+                return NotFound(result.Error);
+            }
+            return Ok(result.Variants);
+        }
     }
 }

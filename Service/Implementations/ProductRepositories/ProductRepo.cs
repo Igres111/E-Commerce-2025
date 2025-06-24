@@ -73,7 +73,7 @@ namespace Service.Implementations.ProductRepositories
         public async Task<APIResponse> UpdateProduct(UpdateProductDto productInfo)
         {
             var product = await _context.Products
-                .Where(p =>p.DeletedAt == null)
+                .Where(p => p.DeletedAt == null)
                 .FirstOrDefaultAsync(p => p.Id == productInfo.ProductId);
             if (product == null)
             {
@@ -107,7 +107,7 @@ namespace Service.Implementations.ProductRepositories
         {
             var product = await _context.Products
                 .Where(p => p.DeletedAt == null)
-                .FirstOrDefaultAsync(p => p.Id == productInfo.ProductId);
+                .FirstOrDefaultAsync(p => p.Id == productInfo.ProductId || p.GroupId == productInfo.ProductId);
             if (product == null)
             {
                 return new APIResponse { IsSuccess = false, Error = "Product not found" };
@@ -115,14 +115,14 @@ namespace Service.Implementations.ProductRepositories
             var variantExists = await _context.Products
                 .Where(v => v.DeletedAt == null)
                 .FirstOrDefaultAsync(v => v.SKU == productInfo.SKU && v.GroupId == productInfo.ProductId);
-            if( variantExists != null)
+            if (variantExists != null)
             {
                 return new APIResponse { IsSuccess = false, Error = "Variant with this SKU already exists" };
             }
             var newVariant = new Product
             {
                 Id = Guid.NewGuid(),
-                GroupId= product.Id,
+                GroupId = product.Id,
                 Name = productInfo.Name,
                 Description = productInfo.Description,
                 Price = productInfo.Price,
@@ -135,6 +135,34 @@ namespace Service.Implementations.ProductRepositories
             await _context.Products.AddAsync(newVariant);
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
+        }
+        public async Task<GetPrVariantResponse> GetVariantsPr(Guid productId)
+        {
+            var products = await _context.Products
+                .Where(p => p.DeletedAt == null && (p.Id == productId || p.GroupId == productId))
+                .ToListAsync();
+            if (products.Count == 0)
+            {
+                return new GetPrVariantResponse { IsSuccess = false, Error = "Product not found" };
             }
+            var newVariants = products.Select(p => new GetPrVariantsDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                StockQuantity = p.StockQuantity,
+                SKU = p.SKU,
+                Color = p.Color,
+                Size = p.Size,
+            }).ToList();
+            return new GetPrVariantResponse
+            {
+                IsSuccess = true,
+                Variants = newVariants
+            };
+        }
     }
 }
+
+

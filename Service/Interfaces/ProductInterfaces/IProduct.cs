@@ -11,5 +11,6 @@ namespace Service.Interfaces.ProductInterfaces
         public Task<APIResponse> UpdateProduct(UpdateProductDto productInfo);
         public Task<APIResponse> DeleteProduct(Guid productId);
         public Task<APIResponse> AddVariantPr(AddVariantPrDto productInfo);
+        public Task<GetPrVariantResponse> GetVariantsPr(Guid productId);
     }
 }
