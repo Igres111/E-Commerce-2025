@@ -34,6 +34,7 @@ namespace Service.Implementations.ProductRepositories
                 SKU = productInfo.SKU,
                 Color = productInfo.Color,
                 Size = productInfo.Size,
+                CreatedAt = DateTime.UtcNow,
             };
             await _context.Products.AddAsync(newProduct);
             await _context.SaveChangesAsync();
@@ -63,8 +64,26 @@ namespace Service.Implementations.ProductRepositories
             {
                 IsSuccess = true,
                 Product = productInfo
+            };
+        }
+        public async Task<APIResponse> UpdateProduct(UpdateProductDto productInfo)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productInfo.ProductId);
+            if (product == null)
+            {
+                return new APIResponse { IsSuccess = false, Error = "Product not found" };
             }
-            ;
+            product.Name = string.IsNullOrWhiteSpace(productInfo.Name) ? product.Name : productInfo.Name;
+            product.Description = string.IsNullOrWhiteSpace(productInfo.Description) ? product.Description : productInfo.Description;
+            product.Price = productInfo.Price <= 0 ? product.Price : productInfo.Price;
+            product.StockQuantity = productInfo.StockQuantity < 0 ? product.StockQuantity : productInfo.StockQuantity;
+            product.SKU = string.IsNullOrWhiteSpace(productInfo.SKU) ? product.SKU : productInfo.SKU;
+            product.Color = string.IsNullOrWhiteSpace(productInfo.Color) ? product.Color : productInfo.Color;
+            product.Size = string.IsNullOrWhiteSpace(productInfo.Size) ? product.Size : productInfo.Size;
+            product.UpdatedAt = DateTime.UtcNow;
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+            return new APIResponse { IsSuccess = true };
         }
     }
 }

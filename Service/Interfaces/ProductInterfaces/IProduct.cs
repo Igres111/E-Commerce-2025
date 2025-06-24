@@ -8,5 +8,6 @@ namespace Service.Interfaces.ProductInterfaces
     {
         public Task<APIResponse> AddProduct(AddProductDto productInfo);
         public Task<GetProductResponse> GetProduct(Guid productId);
+        public Task<APIResponse> UpdateProduct(UpdateProductDto productInfo);
     }
 }

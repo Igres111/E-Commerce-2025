@@ -36,7 +36,22 @@ namespace E_Commerce_2025.Controllers
             {
                 return NotFound(result.Error);
             }
-            return Ok(result.Products);
+            return Ok(result.Product);
+        }
+
+        [HttpPut("Update")]
+        public async Task<IActionResult> UpdateProduct([FromBody] DTOs.ProductDtos.UpdateProductDto productInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _prodMethods.UpdateProduct(productInfo);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
         }
     }
 }
