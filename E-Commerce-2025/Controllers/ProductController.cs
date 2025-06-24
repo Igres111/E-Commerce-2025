@@ -118,7 +118,7 @@ namespace E_Commerce_2025.Controllers
             }
             return Ok(result);
         }
-        [HttpGet]
+        [HttpGet("Get-All")]
         public async Task<IActionResult> GetAllProducts([FromQuery] GetAllProductsDto productInfo)
         {
             var result = await _prodMethods.GetAllProducts(productInfo);

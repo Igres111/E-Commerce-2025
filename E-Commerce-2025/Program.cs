@@ -1,4 +1,5 @@
 using DataAccess.Database;
+using E_Commerce_2025.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Service.Implementations.CategoryRepositories;
@@ -13,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSignalR();
 
 DotNetEnv.Env.Load();
 
@@ -42,7 +45,9 @@ builder.Services.AddScoped<ICategory, CategoryRepo>();
 
 var app = builder.Build();
 
-//app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
+
+app.MapHub<InventoryHub>("/hubs/inventory");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -202,7 +202,7 @@ namespace Service.Implementations.ProductRepositories
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
         }
-        public async Task<GetAllItemsResponse<GetProductDto>> GetAllProducts(GetAllProductsDto productInfo)
+        public async Task<GetAllItemsResponse> GetAllProducts(GetAllProductsDto productInfo)
         {
             var query = _context.Products.Where(p => p.DeletedAt == null);
 
@@ -231,7 +231,7 @@ namespace Service.Implementations.ProductRepositories
                 })
                 .ToListAsync();
 
-            return new GetAllItemsResponse<GetProductDto>
+            return new GetAllItemsResponse
             {
                 Items = items,
                 TotalCount = totalCount,

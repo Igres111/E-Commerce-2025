@@ -22,11 +22,11 @@ namespace E_Commerce_2025.Controllers
                 return BadRequest(ModelState);
             }
             var response = await _categoryMethods.CreateCategory(categoryInfo);
-            if (response.IsSuccess)
+            if (!response.IsSuccess)
             {
-                return Ok(response);
+                return BadRequest(response);
             }
-            return BadRequest(response);
+            return Ok(response);
         }
         [HttpGet("hierarchy")]
         public async Task<IActionResult> GetAllCategories()

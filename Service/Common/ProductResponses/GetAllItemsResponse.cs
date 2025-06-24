@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Service.Common.ProductResponses
 {
-    public class GetAllItemsResponse<T> : GetAllProductsDto
+    public class GetAllItemsResponse : GetAllProductsDto
     {
-        public List<T> Items { get; set; } 
+        public List<GetProductDto> Items { get; set; } 
     }
 }
