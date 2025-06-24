@@ -183,6 +183,18 @@ namespace Service.Implementations.ProductRepositories
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
         }
+        public async Task<APIResponse> DeleteVariantPr(DeleteVariationPrDto productInfo)
+        {
+            var variant = await _context.Products.FirstOrDefaultAsync(p => p.GroupId == productInfo.GroupId && p.SKU == productInfo.SKU);
+            if (variant == null)
+            {
+                return new APIResponse { IsSuccess = false, Error = "Variant not found" };
+            }
+            variant.DeletedAt = DateTime.UtcNow;
+            _context.Products.Update(variant);
+            await _context.SaveChangesAsync();
+            return new APIResponse { IsSuccess = true };
+        }
     }
 }
 
