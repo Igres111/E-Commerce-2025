@@ -26,6 +26,11 @@ namespace Service.Implementations.ProductRepositories
             {
                 return new APIResponse { IsSuccess = false, Error = "Product already exists" };
             }
+
+            var categories = await _context.Categories
+            .Where(c => productInfo.CategoryId.Contains(c.Id))
+            .ToListAsync();
+
             var newProduct = new Product
             {
                 Id = Guid.NewGuid(),
@@ -37,7 +42,9 @@ namespace Service.Implementations.ProductRepositories
                 Color = productInfo.Color,
                 Size = productInfo.Size,
                 CreatedAt = DateTime.UtcNow,
+                Categories = categories,
             };
+
             await _context.Products.AddAsync(newProduct);
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
