@@ -1,7 +1,9 @@
 using DataAccess.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Service.Implementations.CategoryRepositories;
 using Service.Implementations.ProductRepositories;
+using Service.Interfaces.CategoryInterfaces;
 using Service.Interfaces.ProductInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +31,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.AddScoped<IProduct, ProductRepo>();
+builder.Services.AddScoped<ICategory, CategoryRepo>();
 
 var app = builder.Build();
 
