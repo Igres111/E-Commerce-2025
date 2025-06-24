@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DTOs.ProductDtos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces.ProductInterfaces;
 
@@ -14,7 +15,7 @@ namespace E_Commerce_2025.Controllers
             _prodMethods = prodMethods;
         }
         [HttpPost()]
-        public async Task<IActionResult> AddProduct([FromBody] DTOs.ProductDtos.AddProductDto productInfo)
+        public async Task<IActionResult> AddProduct(AddProductDto productInfo)
         {
             if (!ModelState.IsValid)
             {
@@ -40,7 +41,7 @@ namespace E_Commerce_2025.Controllers
         }
 
         [HttpPut("{productId}")]
-        public async Task<IActionResult> UpdateProduct([FromBody] DTOs.ProductDtos.UpdateProductDto productInfo)
+        public async Task<IActionResult> UpdateProduct(UpdateProductDto productInfo)
         {
             if (!ModelState.IsValid)
             {
@@ -63,8 +64,9 @@ namespace E_Commerce_2025.Controllers
             }
             return Ok(result);
         }
+
         [HttpPost("{productId}/variants")]
-        public async Task<IActionResult> AddVariant([FromBody] DTOs.ProductDtos.AddVariantPrDto productInfo)
+        public async Task<IActionResult> AddVariant(AddVariantPrDto productInfo)
         {
             if (!ModelState.IsValid)
             {
@@ -77,6 +79,7 @@ namespace E_Commerce_2025.Controllers
             }
             return Ok(result);
         }
+
         [HttpGet("{productId}/variants")]
         public async Task<IActionResult> GetVariant(Guid productId)
         {
@@ -86,6 +89,21 @@ namespace E_Commerce_2025.Controllers
                 return NotFound(result.Error);
             }
             return Ok(result.Variants);
+        }
+
+        [HttpPut("variants")]
+        public async Task<IActionResult> UpdateVariant(UpdateVariantPrDto productInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _prodMethods.UpdateVariantPr(productInfo);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result);
         }
     }
 }

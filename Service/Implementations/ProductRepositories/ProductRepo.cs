@@ -162,6 +162,27 @@ namespace Service.Implementations.ProductRepositories
                 Variants = newVariants
             };
         }
+        public async Task<APIResponse> UpdateVariantPr(UpdateVariantPrDto productInfo)
+        {
+            var variant = await _context.Products
+                .Where(p => p.DeletedAt == null)
+                .FirstOrDefaultAsync(p => p.SKU == productInfo.SKU && p.GroupId == productInfo.GroupId);
+            if (variant == null)
+            {
+                return new APIResponse { IsSuccess = false, Error = "Variant not found" };
+            }
+            variant.Name = string.IsNullOrWhiteSpace(productInfo.Name) ? variant.Name : productInfo.Name;
+            variant.Description = string.IsNullOrWhiteSpace(productInfo.Description) ? variant.Description : productInfo.Description;
+            variant.Price = productInfo.Price <= 0 ? variant.Price : productInfo.Price;
+            variant.StockQuantity = productInfo.StockQuantity < 0 ? variant.StockQuantity : productInfo.StockQuantity;
+            variant.SKU = string.IsNullOrWhiteSpace(productInfo.SKU) ? variant.SKU : productInfo.SKU;
+            variant.Color = string.IsNullOrWhiteSpace(productInfo.Color) ? variant.Color : productInfo.Color;
+            variant.Size = string.IsNullOrWhiteSpace(productInfo.Size) ? variant.Size : productInfo.Size;
+            variant.UpdatedAt = DateTime.UtcNow;
+            _context.Products.Update(variant);
+            await _context.SaveChangesAsync();
+            return new APIResponse { IsSuccess = true };
+        }
     }
 }
 
