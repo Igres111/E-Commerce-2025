@@ -52,5 +52,15 @@ namespace E_Commerce_2025.Controllers
             }
             return Ok(response);
         }
+        [HttpDelete("{categoryId}")]
+        public async Task<IActionResult> DeleteCategory(Guid categoryId)
+        {
+            var response = await _categoryMethods.DeleteCategory(categoryId);
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }

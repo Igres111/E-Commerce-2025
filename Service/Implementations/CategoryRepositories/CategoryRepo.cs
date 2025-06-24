@@ -99,5 +99,21 @@ namespace Service.Implementations.CategoryRepositories
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
         }
+        public async Task<APIResponse> DeleteCategory(Guid categoryId)
+        {
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == categoryId && c.DeletedAt == null);
+            if (category == null)
+            {
+                return new APIResponse
+                {
+                    IsSuccess = false,
+                    Error = "Category already deleted"
+                };
+            }
+            category.DeletedAt = DateTime.UtcNow;
+            _context.Categories.Update(category);
+            await _context.SaveChangesAsync();
+            return new APIResponse { IsSuccess = true };
+        }
     }
 }

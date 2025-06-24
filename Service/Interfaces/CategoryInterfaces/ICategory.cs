@@ -9,5 +9,6 @@ namespace Service.Interfaces.CategoryInterfaces
         public Task<APIResponse> CreateCategory(CreateCategoryDto categoryInfo);
         public Task<GetAllCategoryResponse> GetAllCategories();
         public Task<APIResponse> UpdateCategory(UpdateCategoryDto categoryInfo);
+        public Task<APIResponse> DeleteCategory(Guid categoryId);
     }
 }
