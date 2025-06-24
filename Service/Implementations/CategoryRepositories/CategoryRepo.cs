@@ -28,7 +28,7 @@ namespace Service.Implementations.CategoryRepositories
                 };
             }
             var categoryExists = await _context.Categories
-                .AnyAsync(c => c.Name == categoryInfo.Name && c.ParentCategoryId == categoryInfo.ParentCategoryId);
+                .AnyAsync(c => c.Name == categoryInfo.Name && c.ParentCategoryId == categoryInfo.ParentCategoryId && c.DeletedAt == null);
             if (categoryExists)
             {
                 return new APIResponse
@@ -53,6 +53,7 @@ namespace Service.Implementations.CategoryRepositories
         public async Task<GetAllCategoryResponse> GetAllCategories()
         {
             var categories = await _context.Categories
+                .Where(c => c.DeletedAt == null)
                 .Include(c => c.Subcategories)
                 .ToListAsync();
 
@@ -68,17 +69,35 @@ namespace Service.Implementations.CategoryRepositories
             var result = categories
                 .Where(c => c.ParentCategoryId == null)
                 .Select(c => new GetAllCategoriesDto
-            {
-                Name = c.Name,
-                Id = c.Id,
-                Subcategories = c.Subcategories.Select(sub => new GetSubCategoryDto
                 {
-                    Id = sub.Id,
-                    Name = sub.Name,
-                }).ToList()
-            }).ToList();
+                    Name = c.Name,
+                    Id = c.Id,
+                    Subcategories = c.Subcategories.Select(sub => new GetSubCategoryDto
+                    {
+                        Id = sub.Id,
+                        Name = sub.Name,
+                    }).ToList()
+                }).ToList();
 
             return new GetAllCategoryResponse { IsSuccess = true, AllCategories = result };
+        }
+        public async Task<APIResponse> UpdateCategory(UpdateCategoryDto categoryInfo)
+        {
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == categoryInfo.Id && c.DeletedAt == null);
+            if (category == null)
+            {
+                return new APIResponse
+                {
+                    IsSuccess = false,
+                    Error = "Category not found"
+                };
+            }
+            category.Name = string.IsNullOrWhiteSpace(categoryInfo.Name) ? category.Name : categoryInfo.Name;
+            category.ParentCategoryId = categoryInfo.ParentCategoryId == Guid.Empty ? category.ParentCategoryId : categoryInfo.ParentCategoryId;
+            category.UpdatedAt = DateTime.UtcNow;
+            _context.Categories.Update(category);
+            await _context.SaveChangesAsync();
+            return new APIResponse { IsSuccess = true };
         }
     }
 }

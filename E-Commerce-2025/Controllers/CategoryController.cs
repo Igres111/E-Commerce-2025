@@ -28,11 +28,25 @@ namespace E_Commerce_2025.Controllers
             }
             return BadRequest(response);
         }
-        [HttpGet("All")]
+        [HttpGet("hierarchy")]
         public async Task<IActionResult> GetAllCategories()
         {
             var response = await _categoryMethods.GetAllCategories();
-            if(!response.IsSuccess)
+            if (!response.IsSuccess)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+        [HttpPut()]
+        public async Task<IActionResult> UpdateCategory(UpdateCategoryDto categoryInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var response = await _categoryMethods.UpdateCategory(categoryInfo);
+            if (!response.IsSuccess)
             {
                 return BadRequest(response);
             }
