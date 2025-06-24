@@ -18,7 +18,9 @@ namespace Service.Implementations.ProductRepositories
 
         public async Task<APIResponse> AddProduct(AddProductDto productInfo)
         {
-            var productExists = await _context.Products.FirstOrDefaultAsync(p => p.Name == productInfo.Name);
+            var productExists = await _context.Products
+                .Where(p => p.DeletedAt == null)
+                .FirstOrDefaultAsync(p => p.Name == productInfo.Name);
 
             if (productExists != null)
             {
@@ -42,7 +44,9 @@ namespace Service.Implementations.ProductRepositories
         }
         public async Task<GetProductResponse> GetProduct(Guid productId)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
+            var product = await _context.Products
+                .Where(p => p.DeletedAt == null)
+                .FirstOrDefaultAsync(p => p.Id == productId);
 
             if (product == null)
             {
@@ -68,7 +72,9 @@ namespace Service.Implementations.ProductRepositories
         }
         public async Task<APIResponse> UpdateProduct(UpdateProductDto productInfo)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productInfo.ProductId);
+            var product = await _context.Products
+                .Where(p =>p.DeletedAt == null)
+                .FirstOrDefaultAsync(p => p.Id == productInfo.ProductId);
             if (product == null)
             {
                 return new APIResponse { IsSuccess = false, Error = "Product not found" };
@@ -81,6 +87,18 @@ namespace Service.Implementations.ProductRepositories
             product.Color = string.IsNullOrWhiteSpace(productInfo.Color) ? product.Color : productInfo.Color;
             product.Size = string.IsNullOrWhiteSpace(productInfo.Size) ? product.Size : productInfo.Size;
             product.UpdatedAt = DateTime.UtcNow;
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
+            return new APIResponse { IsSuccess = true };
+        }
+        public async Task<APIResponse> DeleteProduct(Guid productId)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == productId);
+            if (product == null)
+            {
+                return new APIResponse { IsSuccess = false, Error = "Product not found" };
+            }
+            product.DeletedAt = DateTime.UtcNow;
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
