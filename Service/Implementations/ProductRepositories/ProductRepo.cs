@@ -202,6 +202,44 @@ namespace Service.Implementations.ProductRepositories
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
         }
+        public async Task<GetAllItemsResponse<GetProductDto>> GetAllProducts(GetAllProductsDto productInfo)
+        {
+            var query = _context.Products.Where(p => p.DeletedAt == null);
+
+            if (!string.IsNullOrWhiteSpace(productInfo.Query))
+            {
+                var lowered = productInfo.Query.ToLower();
+                query = query.Where(p => p.Name.ToLower().Contains(lowered));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(p => p.Name)
+                .Skip((productInfo.Page - 1) * productInfo.PageSize)
+                .Take(productInfo.PageSize)
+                .Select(p => new GetProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    SKU = p.SKU,
+                    StockQuantity = p.StockQuantity,
+                    Color = p.Color,
+                    Size = p.Size,
+                })
+                .ToListAsync();
+
+            return new GetAllItemsResponse<GetProductDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = productInfo.Page,
+                PageSize = productInfo.PageSize
+            };
+        }
+
     }
 }
 

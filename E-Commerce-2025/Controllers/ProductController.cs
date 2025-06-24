@@ -1,5 +1,4 @@
 ﻿using DTOs.ProductDtos;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces.ProductInterfaces;
 
@@ -117,6 +116,12 @@ namespace E_Commerce_2025.Controllers
             {
                 return NotFound(result.Error);
             }
+            return Ok(result);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllProducts([FromQuery] GetAllProductsDto productInfo)
+        {
+            var result = await _prodMethods.GetAllProducts(productInfo);
             return Ok(result);
         }
     }
