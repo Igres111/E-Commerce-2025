@@ -268,7 +268,6 @@ namespace Service.Implementations.ProductRepositories
             {
                 query = query.Where(p => p.Name.Contains(searchInfo.Query));
             }
-
             if (searchInfo.MinPrice.HasValue)
             {
                 query = query.Where(p => p.Price >= searchInfo.MinPrice.Value);

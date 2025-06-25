@@ -11,6 +11,14 @@ builder.Services.AddHttpClient("E-commerce-2025", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        opts.JsonSerializerOptions.ReferenceHandler = null;
+        opts.JsonSerializerOptions.PropertyNamingPolicy =
+            System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
+
 builder.Services.AddScoped<ProductApiService>();
 
 var app = builder.Build();
