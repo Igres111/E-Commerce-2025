@@ -1,5 +1,8 @@
 ﻿using DTOs.ProductDtos;
+using E_Commerce_2025.Hubs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Service.Interfaces.ProductInterfaces;
 
 namespace E_Commerce_2025.Controllers
@@ -9,9 +12,12 @@ namespace E_Commerce_2025.Controllers
     public class ProductController : ControllerBase
     {
         public readonly IProduct _prodMethods;
-        public ProductController(IProduct prodMethods)
+        private readonly IHubContext<InventoryHub> _hubContext;
+
+        public ProductController(IProduct prodMethods, IHubContext<InventoryHub> hubContext)
         {
             _prodMethods = prodMethods;
+            _hubContext = hubContext;
         }
         [HttpPost()]
         public async Task<IActionResult> AddProduct(AddProductDto productInfo)
@@ -119,9 +125,9 @@ namespace E_Commerce_2025.Controllers
             return Ok(result);
         }
         [HttpGet("Get-All")]
-        public async Task<IActionResult> GetAllProducts([FromQuery] GetAllProductsDto productInfo)
+        public async Task<IActionResult> GetAllProducts()
         {
-            var result = await _prodMethods.GetAllProducts(productInfo);
+            var result = await _prodMethods.GetAllProducts();
             return Ok(result);
         }
     }

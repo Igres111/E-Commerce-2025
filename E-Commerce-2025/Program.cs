@@ -9,7 +9,7 @@ using Service.Interfaces.ProductInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -28,6 +28,17 @@ if (string.IsNullOrEmpty(key))
     throw new Exception("JWT secret key is not set in the environment variables.");
 }
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://localhost:7042") 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); 
+    });
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(connection);
@@ -36,14 +47,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-        options.JsonSerializerOptions.MaxDepth = 32; 
+        options.JsonSerializerOptions.ReferenceHandler = null; 
+        options.JsonSerializerOptions.PropertyNamingPolicy = null; 
     });
 
 builder.Services.AddScoped<IProduct, ProductRepo>();
 builder.Services.AddScoped<ICategory, CategoryRepo>();
 
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 app.UseMiddleware<ExceptionMiddleware>();
 

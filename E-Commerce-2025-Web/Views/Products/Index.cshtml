@@ -1,0 +1,51 @@
+﻿@using E_Commerce_2025_Web.DTOs
+@model List<Product>
+
+<h1>
+    Products
+</h1>
+<div id="products-list">
+@foreach(var product in Model)
+{
+    <div id="product-@product.Id">
+        <p>
+            @product.Name <br />
+            @product.Description <br />
+            @product.Price.ToString("C") <br />
+            <span id="stock-@product.Id">Stock: @product.StockQuantity</span> <br />
+        </p>
+    </div>
+}
+</div>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:7077/hubs/inventory")
+            .build();
+
+        connection.on("ProductDeleted", function(productId) {
+            const productDiv = document.getElementById("product-" + productId);
+            if (productDiv) {
+                productDiv.remove();
+            }
+        });
+
+        connection.on("ProductAdded", function(product) {
+            const container = document.createElement("div");
+            container.id = "product-" + product.id;
+            container.innerHTML = `<p>
+                ${product.name} <br />
+                ${product.description} <br />
+                $${product.price} <br />
+                <span id="stock-${product.id}">Stock: ${product.stockQuantity}</span> <br />
+            </p>`;
+            document.getElementById("products-list").appendChild(container);
+        });
+
+        connection.start()
+            .then(() => console.log("SignalR connected"))
+            .catch(err => console.error("SignalR failed:", err));
+    </script>
+}

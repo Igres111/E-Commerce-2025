@@ -1,19 +1,22 @@
 ﻿using DataAccess.Database;
 using DataAccess.Entities;
 using DTOs.ProductDtos;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Service.Common;
 using Service.Common.ProductResponses;
 using Service.Interfaces.ProductInterfaces;
-
+using E_Commerce_2025.Hubs;
 namespace Service.Implementations.ProductRepositories
 {
     public class ProductRepo : IProduct
     {
         public readonly AppDbContext _context;
-        public ProductRepo(AppDbContext context)
+        private readonly IHubContext<InventoryHub> _hubContext;
+        public ProductRepo(AppDbContext context, IHubContext<InventoryHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         public async Task<APIResponse> AddProduct(AddProductDto productInfo)
@@ -47,6 +50,7 @@ namespace Service.Implementations.ProductRepositories
 
             await _context.Products.AddAsync(newProduct);
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("ProductAdded", productInfo);
             return new APIResponse { IsSuccess = true };
         }
         public async Task<GetProductResponse> GetProduct(Guid productId)
@@ -108,6 +112,7 @@ namespace Service.Implementations.ProductRepositories
             product.DeletedAt = DateTime.UtcNow;
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("ProductDeleted", productId);
             return new APIResponse { IsSuccess = true };
         }
         public async Task<APIResponse> AddVariantPr(AddVariantPrDto productInfo)
@@ -202,22 +207,11 @@ namespace Service.Implementations.ProductRepositories
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
         }
-        public async Task<GetAllItemsResponse> GetAllProducts(GetAllProductsDto productInfo)
+        public async Task<List<GetProductDto>> GetAllProducts()
         {
-            var query = _context.Products.Where(p => p.DeletedAt == null);
-
-            if (!string.IsNullOrWhiteSpace(productInfo.Query))
-            {
-                var lowered = productInfo.Query.ToLower();
-                query = query.Where(p => p.Name.ToLower().Contains(lowered));
-            }
-
-            var totalCount = await query.CountAsync();
-
-            var items = await query
+            var items = await _context.Products
+                .Where(p => p.DeletedAt == null)
                 .OrderBy(p => p.Name)
-                .Skip((productInfo.Page - 1) * productInfo.PageSize)
-                .Take(productInfo.PageSize)
                 .Select(p => new GetProductDto
                 {
                     Id = p.Id,
@@ -231,15 +225,8 @@ namespace Service.Implementations.ProductRepositories
                 })
                 .ToListAsync();
 
-            return new GetAllItemsResponse
-            {
-                Items = items,
-                TotalCount = totalCount,
-                Page = productInfo.Page,
-                PageSize = productInfo.PageSize
-            };
+            return items;
         }
-
     }
 }
 
