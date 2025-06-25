@@ -45,7 +45,7 @@ namespace E_Commerce_2025.Controllers
             return Ok(result.Product);
         }
 
-        [HttpPut()]
+        [HttpPut("{productId}")]
         public async Task<IActionResult> UpdateProduct(UpdateProductDto productInfo)
         {
             if (!ModelState.IsValid)
@@ -96,7 +96,7 @@ namespace E_Commerce_2025.Controllers
             return Ok(result.Variants);
         }
 
-        [HttpPut("variants")]
+        [HttpPut("{productId}/variants")]
         public async Task<IActionResult> UpdateVariant(UpdateVariantPrDto productInfo)
         {
             if (!ModelState.IsValid)
@@ -110,7 +110,7 @@ namespace E_Commerce_2025.Controllers
             }
             return Ok(result);
         }
-        [HttpDelete("variants")]
+        [HttpDelete("{productId}/variants")]
         public async Task<IActionResult> DeleteVariant(DeleteVariationPrDto productInfo)
         {
             if (!ModelState.IsValid)

@@ -12,15 +12,16 @@ namespace E_Commerce_2025_Web.Services
         public async Task<List<Product>> GetProductsAsync()
         {
             var response = await _httpClient.GetAsync("/api/Product/Get-All");
-            if (response.IsSuccessStatusCode)
-            {
-                var data = await response.Content.ReadFromJsonAsync<List<Product>>();
-                return  data ?? new List<Product>();
-            }
-            else
-            {
+            if (!response.IsSuccessStatusCode)
                 throw new Exception("Failed to load products from API");
-            }
+
+            var wrapper = await response.Content
+                .ReadFromJsonAsync<GetAllItemsResponse>();
+
+            if (wrapper == null || !wrapper.IsSuccess)
+                throw new Exception(wrapper?.Error ?? "Empty response");
+
+            return wrapper.Items;
         }
     }
 }

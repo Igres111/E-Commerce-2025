@@ -244,7 +244,7 @@
             Color:          f.Color.value,
             Size:           f.Size.value
           };
-          await fetch("https://localhost:7077/api/Product", {
+          await fetch("https://localhost:7077/api/Product/${id}", {
             method:  "PUT",
             headers: { "Content-Type": "application/json" },
             body:    JSON.stringify(dto)

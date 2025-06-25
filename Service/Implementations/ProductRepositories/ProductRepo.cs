@@ -30,9 +30,10 @@ namespace Service.Implementations.ProductRepositories
             {
                 return new APIResponse { IsSuccess = false, Error = "Product already exists" };
             }
+            var categoryIds = productInfo.CategoryId ?? new List<Guid>();
 
             var categories = await _context.Categories
-            .Where(c => productInfo.CategoryId.Contains(c.Id))
+            .Where(c => categoryIds.Contains(c.Id))
             .ToListAsync();
 
             var newProduct = new Product
@@ -235,7 +236,7 @@ namespace Service.Implementations.ProductRepositories
             await _context.SaveChangesAsync();
             return new APIResponse { IsSuccess = true };
         }
-        public async Task<List<GetProductDto>> GetAllProducts()
+        public async Task<GetAllItemsResponse> GetAllProducts()
         {
             var items = await _context.Products
                 .Where(p => p.DeletedAt == null)
@@ -253,7 +254,11 @@ namespace Service.Implementations.ProductRepositories
                 })
                 .ToListAsync();
 
-            return items;
+            return new GetAllItemsResponse
+            {
+                IsSuccess = true,
+                Items = items
+            };
         }
     }
 }

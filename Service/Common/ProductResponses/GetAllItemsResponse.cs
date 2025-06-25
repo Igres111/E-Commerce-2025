@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Service.Common.ProductResponses
 {
-    public class GetAllItemsResponse : GetAllProductsDto
+    public class GetAllItemsResponse : APIResponse
     {
         public List<GetProductDto> Items { get; set; } 
     }
