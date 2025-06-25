@@ -193,6 +193,11 @@
           items[1].textContent = "Stock: "  + product.stockQuantity;
         });
 
+           connection.on("ProductDeleted", productId => {
+           const card = document.getElementById("product-" + productId);
+           if (card) card.remove();
+        });
+
         document.getElementById("products-list").addEventListener("click", e => {
           if (e.target.matches(".edit-btn")) {
             const id = e.target.dataset.id;
@@ -219,8 +224,7 @@
           if (e.target.matches(".delete-btn")) {
             const id = e.target.dataset.id;
             if (!confirm("Delete this product?")) return;
-            fetch(`https://localhost:7077/api/Product/${id}`, { method: "DELETE" })
-              .then(res => res.ok && document.getElementById("product-" + id)?.remove());
+            fetch(`https://localhost:7077/api/Product/${id}`, { method: "DELETE" });
           }
         });
 
