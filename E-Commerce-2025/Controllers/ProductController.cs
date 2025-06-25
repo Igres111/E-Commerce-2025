@@ -19,8 +19,8 @@ namespace E_Commerce_2025.Controllers
             _prodMethods = prodMethods;
             _hubContext = hubContext;
         }
-        [HttpPost()]
-        public async Task<IActionResult> AddProduct(AddProductDto productInfo)
+        [HttpPost("add")]
+        public async Task<IActionResult> AddProduct([FromBody] AddProductDto productInfo)
         {
             if (!ModelState.IsValid)
             {

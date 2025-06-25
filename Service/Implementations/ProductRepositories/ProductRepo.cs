@@ -1,12 +1,12 @@
 ﻿using DataAccess.Database;
 using DataAccess.Entities;
 using DTOs.ProductDtos;
+using E_Commerce_2025.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Service.Common;
 using Service.Common.ProductResponses;
 using Service.Interfaces.ProductInterfaces;
-using E_Commerce_2025.Hubs;
 namespace Service.Implementations.ProductRepositories
 {
     public class ProductRepo : IProduct
@@ -47,10 +47,22 @@ namespace Service.Implementations.ProductRepositories
                 CreatedAt = DateTime.UtcNow,
                 Categories = categories,
             };
+            var broadcast = new ProductBroadcastDto
+            {
+                Id = newProduct.Id,
+                Name = newProduct.Name,
+                Description = newProduct.Description,
+                Price = newProduct.Price,
+                StockQuantity = newProduct.StockQuantity,
+                SKU = newProduct.SKU,
+                Color = newProduct.Color,
+                Size = newProduct.Size,
+                CategoryIds = newProduct.Categories.Select(c => c.Id).ToList()
+            };
 
             await _context.Products.AddAsync(newProduct);
             await _context.SaveChangesAsync();
-            await _hubContext.Clients.All.SendAsync("ProductAdded", productInfo);
+            await _hubContext.Clients.All.SendAsync("ProductAdded", broadcast);
             return new APIResponse { IsSuccess = true };
         }
         public async Task<GetProductResponse> GetProduct(Guid productId)

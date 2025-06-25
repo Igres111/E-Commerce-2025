@@ -1,51 +1,168 @@
 ﻿@using E_Commerce_2025_Web.DTOs
 @model List<Product>
 
-<h1>
-    Products
-</h1>
-<div id="products-list">
-@foreach(var product in Model)
-{
-    <div id="product-@product.Id">
-        <p>
-            @product.Name <br />
-            @product.Description <br />
-            @product.Price.ToString("C") <br />
-            <span id="stock-@product.Id">Stock: @product.StockQuantity</span> <br />
-        </p>
-    </div>
-}
-</div>
-@section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
+<h1 class="my-4 text-center">Products</h1>
+
+<div class="container">
+    <div id="products-list" class="row g-3">
+        @foreach (var product in Model)
+        {
+            <div id="product-@product.Id" class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="card-text">@product.Description</p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Price: @product.Price.ToString("C")</li>
+                        <li class="list-group-item">Stock: @product.StockQuantity</li>
+                    </ul>
+                    <div class="card-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm btn-secondary edit-btn" data-id="@product.Id">Edit</button>
+                        <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="@product.Id">Delete</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="text-center my-4">
+        <button id="create-btn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#create-modal">Create</button>
+    </div>
+</div>
+
+<div class="modal fade" id="create-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="create-form">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">CategoryId</label>
+                        <input type="text" name="CategoryId" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="Name" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" name="Description" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" step="0.01" name="Price" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">StockQuantity</label>
+                        <input type="number" name="StockQuantity" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SKU</label>
+                        <input type="text" name="SKU" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Color</label>
+                        <input type="text" name="Color" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Size</label>
+                        <input type="text" name="Size" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancel-create">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:7077/hubs/inventory")
-            .build();
-
-        connection.on("ProductDeleted", function(productId) {
-            const productDiv = document.getElementById("product-" + productId);
-            if (productDiv) {
-                productDiv.remove();
-            }
-        });
-
-        connection.on("ProductAdded", function(product) {
-            const container = document.createElement("div");
-            container.id = "product-" + product.id;
-            container.innerHTML = `<p>
-                ${product.name} <br />
-                ${product.description} <br />
-                $${product.price} <br />
-                <span id="stock-${product.id}">Stock: ${product.stockQuantity}</span> <br />
-            </p>`;
-            document.getElementById("products-list").appendChild(container);
-        });
+          .withUrl("https://localhost:7077/hubs/inventory", { transport: signalR.HttpTransportType.WebSockets })
+          .withAutomaticReconnect()
+          .build();
 
         connection.start()
-            .then(() => console.log("SignalR connected"))
-            .catch(err => console.error("SignalR failed:", err));
+          .then(() => console.log("SignalR connected"))
+          .catch(err => console.error("SignalR failed:", err));
+
+        connection.on("ProductAdded", product => {
+          const html = `
+            <div id="product-${product.id}" class="col-md-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">${product.name}</h5>
+                  <p class="card-text">${product.description}</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Price: $${product.price.toFixed(2)}</li>
+                  <li class="list-group-item">Stock: ${product.stockQuantity}</li>
+                </ul>
+                <div class="card-footer d-flex justify-content-between">
+                  <button type="button" class="btn btn-sm btn-secondary edit-btn" data-id="${product.id}">Edit</button>
+                  <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="${product.id}">Delete</button>
+                </div>
+              </div>
+            </div>`;
+          const list = document.getElementById("products-list");
+          const createBtnContainer = document.querySelector(".text-center.my-4");
+          createBtnContainer.insertAdjacentHTML("beforebegin", html);
+        });
+
+        document.getElementById("products-list").addEventListener("click", async e => {
+          if (e.target.matches(".delete-btn")) {
+            const id = e.target.getAttribute("data-id");
+            if (!confirm("Delete this product?")) return;
+            const res = await fetch(`https://localhost:7077/api/Product/${id}`, { method: "DELETE" });
+            if (res.ok) {
+              document.getElementById("product-" + id)?.remove();
+            } else {
+              alert("Delete failed");
+            }
+          }
+          if (e.target.matches(".edit-btn")) {
+            const id = e.target.getAttribute("data-id");
+            console.log("Edit product", id);
+          }
+        });
+
+        document.getElementById("create-form").onsubmit = async e => {
+          e.preventDefault();
+          const f = e.target;
+          const raw = f.CategoryId.value.trim();
+          const categoryIds = raw === "" ? null : raw.split(",").map(x => x.trim());
+          const dto = {
+            CategoryId: categoryIds,
+            Name: f.Name.value,
+            Description: f.Description.value,
+            Price: parseFloat(f.Price.value),
+            StockQuantity: parseInt(f.StockQuantity.value),
+            SKU: f.SKU.value,
+            Color: f.Color.value,
+            Size: f.Size.value
+          };
+          const res = await fetch("https://localhost:7077/api/Product/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dto)
+          });
+          if (res.ok) {
+            f.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('create-modal'));
+            modal.hide();
+          } else {
+            alert("Failed to create product");
+          }
+        };
     </script>
 }
