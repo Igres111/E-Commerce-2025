@@ -130,5 +130,19 @@ namespace E_Commerce_2025.Controllers
             var result = await _prodMethods.GetAllProducts();
             return Ok(result);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> QuerySearch([FromQuery] ProductSearchDto searchInfo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _prodMethods.QuerySearch(searchInfo);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result.Items);
+        }
     }
 }

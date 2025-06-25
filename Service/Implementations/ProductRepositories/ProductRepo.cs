@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Service.Common;
 using Service.Common.ProductResponses;
 using Service.Interfaces.ProductInterfaces;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 namespace Service.Implementations.ProductRepositories
 {
     public class ProductRepo : IProduct
@@ -258,6 +257,61 @@ namespace Service.Implementations.ProductRepositories
             {
                 IsSuccess = true,
                 Items = items
+            };
+        }
+        public async Task<GetAllItemsResponse> QuerySearch(ProductSearchDto searchInfo)
+        {
+            var query = _context.Products
+                .Where(p => p.DeletedAt == null);
+
+            if (!string.IsNullOrWhiteSpace(searchInfo.Query))
+            {
+                query = query.Where(p => p.Name.Contains(searchInfo.Query));
+            }
+
+            if (searchInfo.MinPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= searchInfo.MinPrice.Value);
+            }
+            if (searchInfo.MaxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= searchInfo.MaxPrice.Value);
+            }
+            if (searchInfo.CategoryId.HasValue)
+            {
+                query = query.Where(p => p.Categories.Any(c => c.Id == searchInfo.CategoryId.Value));
+            }
+            if (searchInfo.InStock == true)
+            {
+                query = query.Where(p => p.StockQuantity > 0);
+            }
+
+            query = query.OrderBy(p => p.Name);
+
+            if (searchInfo.PageSize > 0)
+            {
+                query = query
+                    .Skip(searchInfo.Page * searchInfo.PageSize)
+                    .Take(searchInfo.PageSize);
+            }
+
+            var results = await query
+                .Select(q => new GetProductDto
+                {
+                    Id = q.Id,
+                    Name = q.Name,
+                    Description = q.Description,
+                    Price = q.Price,
+                    SKU = q.SKU,
+                    StockQuantity = q.StockQuantity,
+                    Color = q.Color,
+                    Size = q.Size
+                })
+                .ToListAsync();
+            return new GetAllItemsResponse
+            {
+                IsSuccess = true,
+                Items = results
             };
         }
     }
