@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Service.Common;
 using Service.Common.ProductResponses;
 using Service.Interfaces.ProductInterfaces;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 namespace Service.Implementations.ProductRepositories
 {
     public class ProductRepo : IProduct
@@ -96,6 +97,7 @@ namespace Service.Implementations.ProductRepositories
         public async Task<APIResponse> UpdateProduct(UpdateProductDto productInfo)
         {
             var product = await _context.Products
+                .Include(p => p.Categories)
                 .Where(p => p.DeletedAt == null)
                 .FirstOrDefaultAsync(p => p.Id == productInfo.ProductId);
             if (product == null)
@@ -112,6 +114,20 @@ namespace Service.Implementations.ProductRepositories
             product.UpdatedAt = DateTime.UtcNow;
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
+
+            var broadcast = new ProductBroadcastDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                StockQuantity = product.StockQuantity,
+                SKU = product.SKU,
+                Color = product.Color,
+                Size = product.Size,
+                CategoryIds = product.Categories.Select(c => c.Id).ToList()
+            };
+            await _hubContext.Clients.All.SendAsync("ProductUpdated", broadcast);
             return new APIResponse { IsSuccess = true };
         }
         public async Task<APIResponse> DeleteProduct(Guid productId)
